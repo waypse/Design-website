@@ -8,27 +8,32 @@ if (history.scrollRestoration) {
 function getUp () {
     window.scrollTo(0,0)
 }
-let animating = true;
 // animation de deplacement du wrapper
-function wrapperAnim () {
-    const wrapper = document.getElementsByClassName('wrapper')[0];
-    
-        if (window.scrollY > 2) {
-            wrapper.classList.remove('after-start-out');
-            wrapper.classList.add('after-start-in');
-        } else if (window.scrollY < 1) {
-            wrapper.classList.add('after-start-out');
-            wrapper.classList.remove('after-start-in');    
-        }
-    
+let boo = true;
+const wrapper = document.getElementsByClassName('wrapper')[0];
+function wrapperAnimation() {
+    if (window.scrollY > 2 && boo == true) {
+        document.body.style.overflow = 'hidden';
+        wrapper.classList.remove('after-start-out');
+        wrapper.classList.add('after-start-in');
+        boo = false;
+        setTimeout(function () {
+            document.body.style.overflow = 'visible';
+            document.body.style.overflowX = 'hidden';
+        }, 2000)
+    } else if (window.scrollY < 1) {
+        boo = true;
+        document.body.style.overflow = 'hidden';
+        wrapper.classList.add('after-start-out');
+        wrapper.classList.remove('after-start-in');
+        setTimeout(function () {
+            document.body.style.overflow = 'visible';
+            document.body.style.overflowX = 'hidden';
+        }, 2000)   
+    }
 }
 
 
-window.addEventListener('scroll', function () {
-
-    wrapperAnim()
-
-})
 
 // fade in des texte premiere section
 
@@ -62,17 +67,13 @@ function fadeInContent() {
     }
 }
 
-
-window.addEventListener('scroll', function () {
-    fadeInContent()
-})
 //parrallax image clavier demonte
 const parallax = document.getElementsByClassName('img-content')[0];
 window.addEventListener('scroll', function () {
     let offset = window.pageYOffset;
     parallax.style.backgroundPositionY = offset * -0.2 + "px";
 })
-
+if(window.screen.width > 1000){
 //img3d clavier debut de page
 const card = document.querySelector(".img3d");
 const motionMatchMedia = window.matchMedia("(prefers-reduced-motion)");
@@ -99,6 +100,7 @@ if (!motionMatchMedia.matches) {
   card.addEventListener("mouseleave", resetStyles);
 }
 //cursor
+
 let innerCursor = document.querySelector('.inner-cursor');
 let outerCursor = document.querySelector('.outer-cursor');
 document.addEventListener('mousemove', moveCursor);
@@ -137,7 +139,12 @@ buttonss.forEach((button) => {
         innerCursor.classList.remove("grow");
     });
 })
-
+}else {
+    let innerCursor = document.querySelector('.inner-cursor');
+    let outerCursor = document.querySelector('.outer-cursor');
+    innerCursor.classList.add("d-none")
+    outerCursor.classList.add("d-none")
+}
 
 //fade in des texte seconde section
 
@@ -179,104 +186,137 @@ function fadeInContent2() {
     }
 }
 
-
-window.addEventListener('scroll', function () {
-    fadeInContent2()
-})
-
 //fade in des texte troisieme section
 
-function fadeInContent3() {
-    if (scrollY > 3000) {
-        let articles = document.getElementsByClassName("title-articles");
-        let articlesAnimDelayShort = document.getElementsByClassName("underline3");
-        let articlesAnimDelayMedium = document.getElementsByClassName("carousel");
-        let articlesAnimDelayLong = document.getElementsByClassName("buy-section");
-        for(let i = 0; i < articles.length; ++i){
-            articles[i].classList.add("title-slideIn")
-            setTimeout(function() {
-                articles[i].classList.remove("d-none")
 
-            }, 200)
-        }
-        for(let i = 0; i < articlesAnimDelayShort.length; ++i){
-            articlesAnimDelayShort[i].classList.add("title-slideIn")
-            setTimeout(function() {
-                articlesAnimDelayShort[i].classList.remove("d-none")
-
-            }, 200)
-            
-        }
-        for(let i = 0; i < articlesAnimDelayMedium.length; ++i){
-            articlesAnimDelayMedium[i].classList.add("content-slideIn")
-            setTimeout(function() {
-                articlesAnimDelayMedium[i].classList.remove("d-none")
-
-            }, 1000)
-        }
-        for(let i = 0; i < articlesAnimDelayLong.length; ++i){
-            articlesAnimDelayLong[i].classList.add("content-slideIn")
-            setTimeout(function() {
-                articlesAnimDelayLong[i].classList.remove("d-none")
-
-            }, 1500)
-        }
-    }
-}
 window.addEventListener('scroll', function () {
-    fadeInContent3()
+    wrapperAnimation()
+    fadeInContent()
+    fadeInContent2()
 })
 /* carousel */
-let images = [...document.querySelectorAll('.slider-img')]
+let images = [...document.querySelectorAll('.slide')]
 images.forEach((image, idx) =>{
     image.style.backgroundImage = `url(assets/img/${idx+1}.png)`
 })
+function carousel (){
+    var slider = document.getElementById('slider'),
+    sliderItems = document.getElementById('items'),
+    prev = document.getElementById('prev'),
+    next = document.getElementById('next');
 
+slide(slider, sliderItems, prev, next);
 
-let draggableSlider = function () {
-    // DOM element(s)
-    let slider = document.querySelector('.carousel')
-    let innerSlider = document.querySelector('.slider')
+function slide(wrapper, items, prev, next) {
+  var posX1 = 0,
+      posX2 = 0,
+      posInitial,
+      posFinal,
+      threshold = 100,
+      slides = items.getElementsByClassName('slide'),
+      slidesLength = slides.length,
+      slideSize = items.getElementsByClassName('slide')[0].offsetWidth,
+      firstSlide = slides[0],
+      lastSlide = slides[slidesLength - 1],
+      cloneFirst = firstSlide.cloneNode(true),
+      cloneLast = lastSlide.cloneNode(true),
+      index = 0,
+      allowShift = true;
   
-    // Slider variables
-    let pressed = false,
-      startX,
-      x;
+  // Clone first and last slide
+  items.appendChild(cloneFirst);
+  items.insertBefore(cloneLast, firstSlide);
+  wrapper.classList.add('loaded');
   
-    // Mousedown eventlistener
-    slider.addEventListener("mousedown", (e) => {
-      pressed = true;
-      startX = e.offsetX - innerSlider.offsetLeft;
-    });  
-    // window
-    window.addEventListener("mouseup", () => {
-      pressed = false;
-    });
-    // Slider mousemove event listener
-    slider.addEventListener("mousemove", (e) => {
-      if (!pressed) return;
-      e.preventDefault();
+  // Mouse and Touch events
+  items.onmousedown = dragStart;
   
-      x = e.offsetX;
+  // Touch events
+  items.addEventListener('touchstart', dragStart);
+  items.addEventListener('touchend', dragEnd);
+  items.addEventListener('touchmove', dragAction);
   
-      innerSlider.style.left = `${x - startX}px`;
+  // Click events
+  prev.addEventListener('click', function () { shiftSlide(-1) });
+  next.addEventListener('click', function () { shiftSlide(1) });
   
-      checkBoundry();
-    });
+  // Transition events
+  items.addEventListener('transitionend', checkIndex);
   
-    // Check boundry of outer and inner sliders
-    function checkBoundry() {
-      let outer = slider.getBoundingClientRect(),
-        inner = innerSlider.getBoundingClientRect();
-  
-      if (parseInt(innerSlider.style.left) > 0) {
-        innerSlider.style.left = "0px";
-      } else if (inner.right < outer.right) {
-        innerSlider.style.left = `-${inner.width - outer.width}px`;
-      }
+  function dragStart (e) {
+    e = e || window.event;
+    e.preventDefault();
+    posInitial = items.offsetLeft;
+    
+    if (e.type == 'touchstart') {
+      posX1 = e.touches[0].clientX;
+    } else {
+      posX1 = e.clientX;
+      document.onmouseup = dragEnd;
+      document.onmousemove = dragAction;
     }
-  };
-  
-  // Invoke code
-  draggableSlider();
+  }
 
+  function dragAction (e) {
+    e = e || window.event;
+    
+    if (e.type == 'touchmove') {
+      posX2 = posX1 - e.touches[0].clientX;
+      posX1 = e.touches[0].clientX;
+    } else {
+      posX2 = posX1 - e.clientX;
+      posX1 = e.clientX;
+    }
+    items.style.left = (items.offsetLeft - posX2) + "px";
+  }
+  
+  function dragEnd (e) {
+    posFinal = items.offsetLeft;
+    if (posFinal - posInitial < -threshold) {
+      shiftSlide(1, 'drag');
+    } else if (posFinal - posInitial > threshold) {
+      shiftSlide(-1, 'drag');
+    } else {
+      items.style.left = (posInitial) + "px";
+    }
+
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+  
+  function shiftSlide(dir, action) {
+    items.classList.add('shifting');
+    
+    if (allowShift) {
+      if (!action) { posInitial = items.offsetLeft; }
+
+      if (dir == 1) {
+        items.style.left = (posInitial - slideSize) + "px";
+        index++;      
+      } else if (dir == -1) {
+        items.style.left = (posInitial + slideSize) + "px";
+        index--;      
+      }
+    };
+    
+    allowShift = false;
+  }
+    
+  function checkIndex (){
+    items.classList.remove('shifting');
+
+    if (index == -1) {
+      items.style.left = -(slidesLength * slideSize) + "px";
+      index = slidesLength - 1;
+    }
+
+    if (index == slidesLength) {
+      items.style.left = -(1 * slideSize) + "px";
+      index = 0;
+    }
+    
+    allowShift = true;
+  }
+}
+}
+carousel()
